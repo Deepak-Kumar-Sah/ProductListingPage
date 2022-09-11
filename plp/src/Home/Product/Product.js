@@ -1,9 +1,6 @@
-import React from 'react';
-import {TableCell,TableHead,Table,TableRow,TableContainer,Paper,TableBody,CardMedia,Box,Grid, Typography,Container, TextField,Button,Checkbox} from '@mui/material';
+import React,{useState} from 'react';
+import {TableCell,TableHead,Table,TableRow,TableContainer,Paper,TableBody,Box,Grid,Typography,TextField,Button,Checkbox} from '@mui/material';
 import {SentimentSatisfiedAltRounded,ShoppingCart} from '@mui/icons-material';
-
-
-
 
 
 // {"id":1,
@@ -30,60 +27,88 @@ import {SentimentSatisfiedAltRounded,ShoppingCart} from '@mui/icons-material';
 // "https://dummyjson.com/image/i/products/1/3.jpg",
 // "https://dummyjson.com/image/i/products/1/4.jpg",
 // "https://dummyjson.com/image/i/products/1/thumbnail.jpg"]}
-const Product =({products,size,filter,searchKey})=>{
-    console.log(products)
+
+
+const Product =({products,rp,category})=>{
+  const [info, setinfo] = useState({
+    selectedProduct:[],
+    productName:"",
+    productPrice:"",
+    productQty:"",
+  });
+
+  const handleChange = name =>event=>{
+    setinfo({...info,[name]:event.target.value})
+};
+const addItemToCart =(item)=>{
+  let Mycart = []
+  if(typeof window!==undefined){
+      if(localStorage.getItem("cart")){
+        Mycart = JSON.parse(localStorage.getItem("cart"))
+      }
+      Mycart.push({
+          ...item,
+          qty:info.productQty,
+      })
+      localStorage.setItem("cart",JSON.stringify(Mycart))
+  }
+}
+  const productCard = (product)=>{
     return(
-      <TableContainer component={Paper} sx={{bgcolor:"#DCDCDC",}}>
+          <TableRow>
+                    <TableCell sx={{}} >
+                      <Box
+                        component="img"
+                        sx={{
+                          height: 100,
+                          width: 100,
+                          // maxHeight: { xs: 233, md: 167 },
+                          // maxWidth: { xs: 350, md: 250 },
+                        }}
+                        alt="The house from the offer."
+                        src={product.image}
+                      />
+                    </TableCell>
+                    <TableCell sx={{maxWidth:150}} >
+                      {product.title}
+                    </TableCell>
+                    <TableCell sx={{alignContent:"center"}}>{product.rating.rate}</TableCell>
+                    <TableCell sx={{}}>
+                        <Grid container spacing={2}>
+                          <Grid item>
+                            {product.rating.count && <SentimentSatisfiedAltRounded sx={{color:"green"}}/>}
+                          </Grid>
+                          <Grid item>
+                            <Typography sx={{color:"green"}}>In Stock</Typography>
+                          </Grid>
+                        </Grid>
+                      </TableCell>
+                      <TableCell sx={{}}>{product.price}</TableCell>
+                    <Grid container sx={{justifyContent:"flex-end"}}>
+                      <TableCell sx={{}}>
+                        <Grid container sx={{display:"flex"}} spacing={2}>
+                          <Grid item sx={{minWidth:100,maxWidth:50}}>
+                            <TextField onChange={handleChange("productQty")} sx={{}}></TextField>
+                          </Grid>
+                          <Grid item>
+                            <Button  sx={{background:"black"}} startIcon={<ShoppingCart sx={{color:"white"}}/>}></Button>
+                          </Grid>
+                          <Checkbox onClick={()=>{
+                            addItemToCart(product)
+                          }}/>
+                        </Grid>
+                      </TableCell>
+                    </Grid>
+            </TableRow>
+    )
+  };
+    return(
+      <TableContainer component={Paper} sx={{}}>
+        <p className='text-white text-center'>{JSON.stringify(info)} here password is id from the api {"https://gorest.co.in/public/v2/users"}</p>
               <Table sx={{ minWidth: 650 ,}}>
                 <TableBody>
                   {products.map((product) => (
-                    <TableRow
-                      // key={row.name}
-                      // sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-                      sx={{}}
-                    >
-                      <TableCell sx={{bgcolor:"yellow"}} >
-                        <Box
-                          component="img"
-                          sx={{
-                            height: 100,
-                            width: 100,
-                            // maxHeight: { xs: 233, md: 167 },
-                            // maxWidth: { xs: 350, md: 250 },
-                          }}
-                          alt="The house from the offer."
-                          src={product.image}
-                        />
-                      </TableCell>
-                      <TableCell sx={{bgcolor:"green",maxWidth:150}} >
-                        {product.title}
-                      </TableCell>
-                      <TableCell sx={{bgcolor:"red",alignContent:"center"}}>{product.rating.rate}</TableCell>
-                      <TableCell sx={{bgcolor:"blue"}}>
-                          <Grid container>
-                            <Grid item>
-                              {product.rating.count && <SentimentSatisfiedAltRounded sx={{color:"green"}}/>}
-                            </Grid>
-                            <Grid item>
-                              <Typography sx={{color:"green"}}>Success</Typography>
-                            </Grid>
-                          </Grid>
-                        </TableCell>
-                        <TableCell sx={{bgcolor:"pink"}}>{product.price}</TableCell>
-                      <Grid container sx={{justifyContent:"flex-end"}}>
-                        <TableCell sx={{bgcolor:"teal"}}>
-                          <Grid container sx={{display:"flex"}} spacing={2}>
-                            <Grid item sx={{minWidth:100,maxWidth:50}}>
-                              <TextField sx={{}}></TextField>
-                            </Grid>
-                            <Grid item>
-                              <Button sx={{background:"black"}} startIcon={<ShoppingCart sx={{color:"white"}}/>}></Button>
-                            </Grid>
-                            <Checkbox/>
-                          </Grid>
-                        </TableCell>
-                      </Grid>
-                    </TableRow>
+                    (rp || category) ? (rp ? (rp==3?(product.rating.rate>=rp ? productCard(product):""):(product.price>=rp ? productCard(product):"")):(product.category==category ? productCard(product):"")):productCard(product)
                   ))}
                 </TableBody>
               </Table>
